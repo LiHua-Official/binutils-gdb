@@ -1,0 +1,32 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: mkdir build
+      run: mkdir -v build
+    - name: build
+      run: cd build
+    - name: configure
+      run: ../configure --prefix=./tools  \
+             --with-sysroot=./mnt/lfs     \
+             --with-lib-path=/tools/lib   \
+             --target=$LFS_TGT            \
+             --disable-nls                \
+             --disable-werror
+    - name: make
+      run: make
+    - name: make check
+      run: case $(uname -m) in x86_64) mkdir -v /tools/lib && ln -sv lib /tools/lib64 ;; esac
+    - name: make distcheck
+      run: make distcheck
